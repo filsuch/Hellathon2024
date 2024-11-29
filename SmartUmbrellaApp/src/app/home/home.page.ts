@@ -24,6 +24,8 @@ export class HomePage {
         next: (data: any): void => {
           this.weather_data = data;
           this.error_message = null;
+
+          console.log(data);
         },
         error: (error: any): void => {
           this.error_message = 'Nepodařilo se načíst počasí';

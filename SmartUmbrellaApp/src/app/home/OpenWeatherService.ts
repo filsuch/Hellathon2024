@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, from, of, throwError } from 'rxjs';
 import { catchError, switchMap, map } from 'rxjs/operators';
-import { Geolocation } from '@capacitor/geolocation';
+import {Geolocation, Position} from '@capacitor/geolocation';
 
 
 @Injectable({
@@ -17,11 +17,11 @@ export class OpenWeatherService {
   // Získání polohy
   private getDeviceLocation(): Observable<{ lat: number; lon: number }> {
     return from(Geolocation.getCurrentPosition()).pipe(
-      map((position) => ({
+      map((position: Position) => ({
         lat: position.coords.latitude,
         lon: position.coords.longitude,
       })),
-      catchError((error) => {
+      catchError((error: any) => {
         console.error('Chyba při získávání polohy:', error);
         return of({ lat: 0, lon: 0 });  // V případě chyby vrátíme nulu
       })

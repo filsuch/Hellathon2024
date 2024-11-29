@@ -114,6 +114,7 @@ void loop() {
   // Button press handling
   handleButtonPress();
 
+<<<<<<< HEAD
   // Device functionality only when turned on
   if (isDeviceOn) {
     static unsigned long lastUpdateTime = 0;
@@ -122,6 +123,26 @@ void loop() {
     if (millis() - lastUpdateTime > 2000) {
       updateDisplay();
       lastUpdateTime = millis();
+=======
+
+
+
+}
+
+void displayValues() {
+    // Načtení hodnot teploty a vlhkosti
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+
+    // Zkontrolujte, zda nedošlo k chybě při načítání dat
+    if (isnan(humidity) || isnan(temperature)) {
+        Serial.println("Failed to read from DHT sensor!");
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Error reading DHT");
+        display.display();
+        return;
+>>>>>>> a6ab608d1eefc2fa6b65873040c671dc02a402fd
     }
   }
 }

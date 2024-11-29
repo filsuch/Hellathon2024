@@ -26,3 +26,15 @@ void SmartLed::change_color(int r, int g, int b) {
 
     SmartLed::update_led();
 }
+
+
+void SmartLed::on() {
+    SmartLed::strip->setBrightness(255);
+    SmartLed::update_led();
+}
+
+void SmartLed::off() {
+    SmartLed::strip->setBrightness(0);
+    SmartLed::strip->show(); 
+}
+

@@ -5,6 +5,7 @@
 #include <DHT.h>
 #include <Adafruit_NeoPixel.h>
 #include "include/led.h"
+#include "include/vt_led.h"
 
 // Pin Definitions
 #define BUTTON_PIN 26       // Button input pin
@@ -31,9 +32,43 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_
 
 // Global Variables
 unsigned long buttonPressTime = 1;
-bool isDeviceOn = false;
 
-bool displayEnabled = false;
+bool displayEnabled = true;
+bool ledEnable = false;
+
+
+
+#define BUTTON_PIN 26  // Pin pro tlačítko
+
+
+unsigned long lastPressTime = 0;  // Čas posledního stisku
+unsigned long debounceDelay = 50;  // Čas na odstranění šumu (debouncing)
+unsigned long doubleClickInterval = 400;  // Maximální čas mezi dvěma kliknutími pro detekci double-clicku
+int buttonState = 0;  // Aktuální stav tlačítka
+int lastButtonState = 0;  // Předchozí stav tlačítka
+
+bool detectDoubleClick() {
+  static unsigned long lastPressTimeLocal = 0;  // Lokální čas pro detekci double-clicku
+  bool doubleClickDetected = false;
+  
+  buttonState = digitalRead(BUTTON_PIN);  // Čtení aktuálního stavu tlačítka
+
+  // Kontrola, zda došlo k přechodu z nízkého na vysoký stav (stisknutí tlačítka)
+  if (buttonState == HIGH && lastButtonState == LOW) {
+    unsigned long currentTime = millis();  // Získání aktuálního času
+    if (currentTime - lastPressTimeLocal <= doubleClickInterval) {
+      // Pokud mezi dvěma stisky uplynulo méně než doubleClickInterval, je to dvojité kliknutí
+      doubleClickDetected = true;
+    }
+    lastPressTimeLocal = currentTime;  // Uložení času posledního stisku
+    delay(debounceDelay);  // Debouncing - krátké zpoždění, aby se zabránilo opakovanému detekování stejného stisku
+  }
+
+  lastButtonState = buttonState;  // Aktualizace předchozího stavu tlačítka
+  
+  return doubleClickDetected;
+}
+
 
 void setup() {
   // Initialize Serial Communication
@@ -51,6 +86,12 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
 
   SmartLed::begin();
+  SmartVTLed::begin();
+
+  SmartLed::change_color(255, 255, 255);
+
+
+  
   
 
 
@@ -79,57 +120,56 @@ void updateDisplay() {
 }
 
 void handleButtonPress() {
-  static unsigned long lastPressTime = 0;
-  unsigned long currentTime = millis();
+    unsigned long currentTime = millis();  // Získání aktuálního času
+    bool buttonState = digitalRead(BUTTON_PIN);  // Stav tlačítka
 
-  // Double-click detection
-  if (currentTime - lastPressTime < 300) {
-    // Toggle device on/off
-    isDeviceOn = !isDeviceOn;
-    
-    if (isDeviceOn) {
-      // Turn RED when device is on
+    // Zpracování dlouhého stisku (držení tlačítka)
+    if (buttonState == LOW) {  // Pokud je tlačítko stisknuto (LOW)
+        if (buttonPressTime == 0) {
+            buttonPressTime = currentTime;  // Zaznamenání času při prvním stisknutí
+        } else if (currentTime - buttonPressTime >= 1000) {  // Pokud tlačítko držíš déle než 1 sekundu
+            displayEnabled = !displayEnabled;  // Změna stavu displeje
 
-      
-    } else {
-      // Turn off display and RGB strip
+            if(displayEnabled) {
+                SmartVTLed::set_color(255,0, 0);
+            } else {
+                SmartVTLed::set_color(0,0, 0);
+            }
 
-
-    }
-  }
-
-  
-    if (digitalRead(BUTTON_PIN) == LOW) {
-    if (buttonPressTime == 0) {
-        // Zaznamenáme čas prvního stisknutí tlačítka
-        buttonPressTime = currentTime;
-    } else if (currentTime - buttonPressTime >= 1000) {
-
-
-        //Zapnuto
-        SmartLed::change_color(255, 255, 255);
-        displayEnabled = true;
-        
-        buttonPressTime = 0; // Resetujeme čas, abychom mohli detekovat další podržení
-    }
-    } else {
-        // Pokud tlačítko není stisknuté, resetujeme čas
-        buttonPressTime = 0;
+            Serial.print("Displej nastaven na: ");
+            Serial.println(displayEnabled ? "ON" : "OFF");
+            buttonPressTime = 0;  // Resetování času pro další stisk
+        }
+    } else {  // Pokud tlačítko není stisknuto
+        buttonPressTime = 0;  // Resetování času pro dlouhý stisk
     }
 
-  lastPressTime = currentTime;
 }
 
-void loop() {
-  // Button press handling
-  handleButtonPress();
 
-  // Device functionality only when turned on
-  if (isDeviceOn) {
+void loop() {
+
+
+    if (detectDoubleClick()) {
+        Serial.println("Dvojklik detekován!");
+        ledEnable = !ledEnable;
+
+        if(ledEnable) {
+            SmartLed::off();
+        } else {
+            SmartLed::on();
+        }
+
+    }
+
+    handleButtonPress();
+
+
+  
 
     
     updateDisplay();
 
     
-  }
+  
 }

@@ -22,6 +22,9 @@ public:
     static void begin();
     static void loop();
     static void change_color(int r, int g, int b);
+
+    static void on();
+    static void off();
     
 
 };

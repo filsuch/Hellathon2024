@@ -1,9 +1,9 @@
 #pragma once
 #include <Arduino.h>
 // Nastavení RGB LED
-#define RED_PIN 4
-#define GREEN_PIN 15
-#define BLUE_PIN 19
+#define RED_PIN 32
+#define GREEN_PIN 35
+#define BLUE_PIN 34
 
 
 class SmartVTLed {

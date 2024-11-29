@@ -84,11 +84,10 @@ void handleButtonPress() {
     if (isDeviceOn) {
       // Turn RED when device is on
 
-      updateDisplay();
+      
     } else {
       // Turn off display and RGB strip
-      display.clearDisplay();
-      display.display();
+
 
     }
   }
@@ -113,12 +112,10 @@ void loop() {
 
   // Device functionality only when turned on
   if (isDeviceOn) {
-    static unsigned long lastUpdateTime = 0;
+
     
-    // Update display every 2 seconds
-    if (millis() - lastUpdateTime > 2000) {
-      updateDisplay();
-      lastUpdateTime = millis();
-    }
+    updateDisplay();
+
+    
   }
 }

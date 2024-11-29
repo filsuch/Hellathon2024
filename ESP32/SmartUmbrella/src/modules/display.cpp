@@ -8,6 +8,10 @@ void SmartDisplay::begin() {
     SmartDisplay::display->begin(SSD1306_SWITCHCAPVCC, 0x3C);
 }
 
+void SmartDisplay::loop() {
+
+}
+
 
 void SmartDisplay::power_on_display() {
 

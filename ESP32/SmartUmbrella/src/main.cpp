@@ -19,45 +19,45 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_
 Adafruit_AHT10 aht;
 
 void setup() {
-    Serial.begin(115200);
-    
-    // Inicializace displeje
-    display.begin(SSD1306_I2C_ADDRESS, 0x3C); // 0x3C je běžná adresa pro OLED displej
-    display.clearDisplay();  // Vyčistění displeje
-    
-    // Inicializace senzoru
-    if (!aht.begin()) {
-        Serial.println("Nepodařilo se inicializovat AHT10!");
-        while (1);
-    }
-
-    display.setTextSize(1);  // Velikost textu
-    display.setTextColor(WHITE);  // Barva textu
+  // Nastavení sériové komunikace
+  Serial.begin(115200);
+  
+  // Inicializace displeje
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextSize(1);      
+  display.setTextColor(SSD1306_WHITE);  
+  display.setCursor(0,0);
+  
+  // Inicializace senzoru AHT10
+  if (!aht10.begin()) {
+    Serial.println("Nemohu najít AHT10 sensor!");
+    while (1);
+  }
 }
 
 void loop() {
-    // Čtení dat ze senzoru
-    if (aht.read()) {
-        float temperature = aht.getTemperature(); // Získání teploty
-        float humidity = aht.getHumidity();       // Získání vlhkosti
-        
-        // Vyčištění displeje
-        display.clearDisplay();
-        
-        // Zobrazení hodnot
-        display.setCursor(0, 0);
-        display.print("Teplota: ");
-        display.print(temperature);
-        display.println(" C");
+  // Získání dat ze senzoru
+  float temperature = aht10.readTemperature();
+  float humidity = aht10.readHumidity();
 
-        display.print("Vlhkost: ");
-        display.print(humidity);
-        display.println(" %");
+  // Zobrazení dat na sériovém monitoru
+  Serial.print("Teplota: ");
+  Serial.print(temperature);
+  Serial.print(" °C, Vlhkost: ");
+  Serial.print(humidity);
+  Serial.println(" %");
 
-        display.display();  // Odeslání obsahu na displej
-    } else {
-        Serial.println("Chyba při čtení z AHT10");
-    }
-
-    delay(2000);  // Počkat 2 sekundy před dalším měřením
+  // Zobrazení dat na OLED displeji
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("Teplota: ");
+  display.print(temperature);
+  display.println(" °C");
+  display.print("Vlhkost: ");
+  display.print(humidity);
+  display.println(" %");
+  display.display();
+  
+  delay(2000); // Aktualizace každé 2 sekundy
 }

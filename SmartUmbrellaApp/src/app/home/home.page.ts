@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
-import {OpenWeatherService} from "./services/OpenWeatherService";
-
-
+import {Observable} from "rxjs";
+import {OpenWeatherService} from "./OpenWeatherService";
 
 @Component({
-    selector: 'app-home',
-    templateUrl: 'home.page.html',
-    styleUrls: ['home.page.scss'],
-    standalone: false
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
 })
 export class HomePage {
   public weather_data: any = null;
@@ -15,6 +13,9 @@ export class HomePage {
 
   constructor(private weather_service: OpenWeatherService) {}
 
+  ngOnInit(): void {
+    this.get_weather();
+  }
 
 
   public get_weather(): void {
@@ -23,6 +24,8 @@ export class HomePage {
         next: (data: any): void => {
           this.weather_data = data;
           this.error_message = null;
+
+          console.log(data);
         },
         error: (error: any): void => {
           this.error_message = 'Nepodařilo se načíst počasí';
@@ -30,5 +33,4 @@ export class HomePage {
         }
       });
   }
-
 }

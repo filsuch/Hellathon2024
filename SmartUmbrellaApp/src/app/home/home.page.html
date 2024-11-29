@@ -1,5 +1,12 @@
-<div>
-  Hello world
+<div class="section">
 
-
+  <div *ngIf="weather_data">
+    <div class="box">
+      <h2>Počasí pro {{weather_data.name}}:</h2>
+      <p><strong>Teplota:</strong> {{ weather_data.main.temp }} °C</p>
+      <p><strong>Popis:</strong> {{ weather_data.weather[0].description }}</p>
+      <p><strong>Vlhkost:</strong> {{ weather_data.main.humidity }} %</p>
+      <p><strong>Rychlost větru:</strong> {{ weather_data.wind.speed }} m/s</p>
+    </div>
+  </div>
 </div>

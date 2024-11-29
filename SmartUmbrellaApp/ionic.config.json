@@ -1,0 +1,7 @@
+{
+  "name": "SmartUmbrellaApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

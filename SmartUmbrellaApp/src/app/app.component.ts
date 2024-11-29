@@ -3,9 +3,10 @@ import {Platform} from "@ionic/angular";
 import {StatusBar, Style} from "@capacitor/status-bar";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
+    selector: 'app-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    standalone: false
 })
 export class AppComponent {
   private SplashScreen: any;

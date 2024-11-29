@@ -64,12 +64,7 @@ void setup() {
 
 void loop() {
 
-    SmartVTLed::set_color(255, 0, 0); // Red Color
-    delay(500);
-       SmartVTLed::set_color(0, 255, 0); // Red Color
-    delay(500);
-       SmartVTLed::set_color(0, 0, 255); // Red Color
-    delay(500);
+
 
 
 }

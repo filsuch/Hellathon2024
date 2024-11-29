@@ -2,8 +2,8 @@
 #include <Arduino.h>
 // Nastavení RGB LED
 #define RED_PIN 4
-#define GREEN_PIN 16
-#define BLUE_PIN 17
+#define GREEN_PIN 15
+#define BLUE_PIN 19
 
 
 class SmartVTLed {

@@ -45,7 +45,7 @@ void setup() {
 
     // Inicializace RGB LED
     SmartVTLed::begin();
-    SmartVTLed::set_color(0, 150, 150);
+    SmartVTLed::set_color(255, 0, 0);
 
 
     // Inicializace MPU9250
@@ -63,6 +63,14 @@ void setup() {
 }
 
 void loop() {
+
+    SmartVTLed::set_color(255, 0, 0); // Red Color
+    delay(500);
+       SmartVTLed::set_color(0, 255, 0); // Red Color
+    delay(500);
+       SmartVTLed::set_color(0, 0, 255); // Red Color
+    delay(500);
+
 
 }
 

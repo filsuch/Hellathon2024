@@ -7,7 +7,7 @@ void SmartVTLed::begin() {
 }
 
 void SmartVTLed::set_color(int r, int g, int b) {
-    analogWrite(RED_PIN,   r);
-    analogWrite(GREEN_PIN, g);
-    analogWrite(BLUE_PIN,  b);
+    analogWrite(RED_PIN,  255 - r);
+    analogWrite(GREEN_PIN, 255 - g);
+    analogWrite(BLUE_PIN,  255 - b);
 }

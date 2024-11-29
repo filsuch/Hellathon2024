@@ -32,7 +32,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_
 // Global Variables
 unsigned long buttonPressTime = 1;
 bool isDeviceOn = false;
-bool isWhiteMode = false;
+
+bool displayEnabled = false;
 
 void setup() {
   // Initialize Serial Communication
@@ -56,20 +57,25 @@ void setup() {
 }
 
 void updateDisplay() {
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
+    if(displayEnabled) {
+        float humidity = dht.readHumidity();
+        float temperature = dht.readTemperature();
 
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(0,0);
-  display.print("Temp: ");
-  display.print(temperature);
-  display.print(" C");
-  display.setCursor(0,10);
-  display.print("Humidity: ");
-  display.print(humidity);
-  display.print(" %");
-  display.display();
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setCursor(0,0);
+        display.print("Temp: ");
+        display.print(temperature);
+        display.print(" C");
+        display.setCursor(0,10);
+        display.print("Humidity: ");
+        display.print(humidity);
+        display.print(" %");
+        display.display();
+    } else {
+        display.clearDisplay();
+        display.display();
+    }
 }
 
 void handleButtonPress() {
@@ -93,15 +99,23 @@ void handleButtonPress() {
   }
 
   
-  if (digitalRead(BUTTON_PIN) == LOW) {
-    if (currentTime - buttonPressTime > 1000) {
-      isWhiteMode = !isWhiteMode;
+    if (digitalRead(BUTTON_PIN) == LOW) {
+    if (buttonPressTime == 0) {
+        // Zaznamenáme čas prvního stisknutí tlačítka
+        buttonPressTime = currentTime;
+    } else if (currentTime - buttonPressTime >= 1000) {
 
-      SmartLed::change_color(255, 0,0);
-      
 
+        //Zapnuto
+        SmartLed::change_color(255, 255, 255);
+        displayEnabled = true;
+        
+        buttonPressTime = 0; // Resetujeme čas, abychom mohli detekovat další podržení
     }
-  }
+    } else {
+        // Pokud tlačítko není stisknuté, resetujeme čas
+        buttonPressTime = 0;
+    }
 
   lastPressTime = currentTime;
 }

@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <DHT.h>
 #include <Adafruit_NeoPixel.h>
+#include "include/led.h"
 
 // Pin Definitions
 #define BUTTON_PIN 26       // Button input pin
@@ -26,7 +27,7 @@
 // Object Initializations
 DHT dht(DHT_PIN, DHTTYPE);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_DC, OLED_RESET, OLED_CS);
-Adafruit_NeoPixel rgbStrip(NUM_PIXELS, RGB_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+
 
 // Global Variables
 unsigned long buttonPressTime = 1;
@@ -48,9 +49,10 @@ void setup() {
   display.clearDisplay();
   display.setTextColor(SSD1306_WHITE);
 
-  // Initialize RGB Strip
-  rgbStrip.begin();
-  rgbStrip.show(); // Initialize all pixels to 'off'
+  SmartLed::begin();
+  
+
+
 }
 
 void updateDisplay() {
@@ -81,29 +83,24 @@ void handleButtonPress() {
     
     if (isDeviceOn) {
       // Turn RED when device is on
-      rgbStrip.fill(rgbStrip.Color(255, 0, 0));
-      rgbStrip.show();
+
       updateDisplay();
     } else {
       // Turn off display and RGB strip
       display.clearDisplay();
       display.display();
-      rgbStrip.clear();
-      rgbStrip.show();
+
     }
   }
 
-  // Long press detection for white mode
+  
   if (digitalRead(BUTTON_PIN) == LOW) {
     if (currentTime - buttonPressTime > 1000) {
       isWhiteMode = !isWhiteMode;
+
+      SmartLed::change_color(255, 0,0);
       
-      if (isWhiteMode) {
-        rgbStrip.fill(rgbStrip.Color(255, 255, 255));
-      } else {
-        rgbStrip.fill(rgbStrip.Color(255, 0, 0));
-      }
-      rgbStrip.show();
+
     }
   }
 
@@ -114,7 +111,6 @@ void loop() {
   // Button press handling
   handleButtonPress();
 
-<<<<<<< HEAD
   // Device functionality only when turned on
   if (isDeviceOn) {
     static unsigned long lastUpdateTime = 0;
@@ -123,26 +119,6 @@ void loop() {
     if (millis() - lastUpdateTime > 2000) {
       updateDisplay();
       lastUpdateTime = millis();
-=======
-
-
-
-}
-
-void displayValues() {
-    // Načtení hodnot teploty a vlhkosti
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
-
-    // Zkontrolujte, zda nedošlo k chybě při načítání dat
-    if (isnan(humidity) || isnan(temperature)) {
-        Serial.println("Failed to read from DHT sensor!");
-        display.clearDisplay();
-        display.setCursor(0, 0);
-        display.print("Error reading DHT");
-        display.display();
-        return;
->>>>>>> a6ab608d1eefc2fa6b65873040c671dc02a402fd
     }
   }
 }

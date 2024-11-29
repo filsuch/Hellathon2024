@@ -1,105 +1,127 @@
+#include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
 #include <DHT.h>
-#include <Adafruit_Sensor.h>
-#include <Wire.h>
-#include <MPU9250.h>
+#include <Adafruit_NeoPixel.h>
 
-#include "./include/vt_led.h"
+// Pin Definitions
+#define BUTTON_PIN 26       // Button input pin
+#define DHT_PIN 14          // DHT11 data pin
+#define RGB_STRIP_PIN 13    // RGB LED strip data pin
 
-// Definice pinů pro displej
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
+// OLED Pin Definitions
 #define OLED_MOSI 23
 #define OLED_SCK 18
 #define OLED_DC 21
 #define OLED_CS 22
 #define OLED_RESET 15
 
-// Inicializace displeje
+// Device Configurations
+#define DHTTYPE DHT11      // DHT sensor type
+#define SCREEN_WIDTH 128   // OLED display width
+#define SCREEN_HEIGHT 64   // OLED display height
+#define NUM_PIXELS 11       // Number of pixels in RGB strip
+
+// Object Initializations
+DHT dht(DHT_PIN, DHTTYPE);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_DC, OLED_RESET, OLED_CS);
+Adafruit_NeoPixel rgbStrip(NUM_PIXELS, RGB_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
-// Nastavení DHT11
-#define DHTPIN 14
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-
-
-
-
-// Nastavení uspávacího režimu
-bool isSleeping = false;
-const int motionThreshold = 100; // Minimální hodnota pohybu pro aktivaci
+// Global Variables
+unsigned long buttonPressTime = 1;
+bool isDeviceOn = false;
+bool isWhiteMode = false;
 
 void setup() {
-    // Inicializace sériové komunikace
-    Serial.begin(115200);
+  // Initialize Serial Communication
+  Serial.begin(115200);
 
-    // Inicializace OLED displeje
-    display.begin(SSD1306_SWITCHCAPVCC, OLED_CS);
-    display.clearDisplay();
+  // Initialize Button
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-    // Inicializace DHT11
-    dht.begin();
+  // Initialize DHT Sensor
+  dht.begin();
 
-    // Inicializace RGB LED
-    SmartVTLed::begin();
-    SmartVTLed::set_color(255, 0, 0);
+  // Initialize OLED Display
+  display.begin(SSD1306_SWITCHCAPVCC);
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
 
+  // Initialize RGB Strip
+  rgbStrip.begin();
+  rgbStrip.show(); // Initialize all pixels to 'off'
+}
 
-    // Inicializace MPU9250
-    Wire.begin();
+void updateDisplay() {
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
 
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.print("Temp: ");
+  display.print(temperature);
+  display.print(" C");
+  display.setCursor(0,10);
+  display.print("Humidity: ");
+  display.print(humidity);
+  display.print(" %");
+  display.display();
+}
+
+void handleButtonPress() {
+  static unsigned long lastPressTime = 0;
+  unsigned long currentTime = millis();
+
+  // Double-click detection
+  if (currentTime - lastPressTime < 300) {
+    // Toggle device on/off
+    isDeviceOn = !isDeviceOn;
     
+    if (isDeviceOn) {
+      // Turn RED when device is on
+      rgbStrip.fill(rgbStrip.Color(255, 0, 0));
+      rgbStrip.show();
+      updateDisplay();
+    } else {
+      // Turn off display and RGB strip
+      display.clearDisplay();
+      display.display();
+      rgbStrip.clear();
+      rgbStrip.show();
+    }
+  }
 
-    // Zobrazení úvodního textu
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 0);
-    display.print("DHT11 Sensor");
-    display.display();
-    delay(2000);
+  // Long press detection for white mode
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    if (currentTime - buttonPressTime > 1000) {
+      isWhiteMode = !isWhiteMode;
+      
+      if (isWhiteMode) {
+        rgbStrip.fill(rgbStrip.Color(255, 255, 255));
+      } else {
+        rgbStrip.fill(rgbStrip.Color(255, 0, 0));
+      }
+      rgbStrip.show();
+    }
+  }
+
+  lastPressTime = currentTime;
 }
 
 void loop() {
+  // Button press handling
+  handleButtonPress();
 
-    SmartVTLed::set_color(255, 0, 0); // Red Color
-    delay(500);
-       SmartVTLed::set_color(0, 255, 0); // Red Color
-    delay(500);
-       SmartVTLed::set_color(0, 0, 255); // Red Color
-    delay(500);
-
-
-}
-
-void displayValues() {
-    // Načtení hodnot teploty a vlhkosti
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
-
-    // Zkontrolujte, zda nedošlo k chybě při načítání dat
-    if (isnan(humidity) || isnan(temperature)) {
-        Serial.println("Failed to read from DHT sensor!");
-        display.clearDisplay();
-        display.setCursor(0, 0);
-        display.print("Error reading DHT");
-        display.display();
-        return;
+  // Device functionality only when turned on
+  if (isDeviceOn) {
+    static unsigned long lastUpdateTime = 0;
+    
+    // Update display every 2 seconds
+    if (millis() - lastUpdateTime > 2000) {
+      updateDisplay();
+      lastUpdateTime = millis();
     }
-
-    // Zobrazení hodnot na OLED displeji
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("Humidity: ");
-    display.print(humidity);
-    display.print(" %");
-    
-    display.setCursor(0, 10);
-    display.print("Temp: ");
-    display.print(temperature);
-    display.print(" *C");
-    
-    display.display();
+  }
 }

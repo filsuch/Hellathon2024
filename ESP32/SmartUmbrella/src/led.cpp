@@ -1,6 +1,4 @@
-
 #include "./include/led.h"
-
 
 
 void SmartLed::begin() {
@@ -11,25 +9,20 @@ void SmartLed::begin() {
     SmartLed::strip->show();  // Nastaví všechny LED na "off"
 }
 
-void SmartLed::loop() {
-       // Nastavení barev pro všechny LED na pásku (modrá)
+void SmartLed::loop() { }
+
+void SmartLed::update_led() {
+    // Nastavení barev pro všechny LED na pásku (modrá)
     for (int i = 0; i < SmartLed::strip->numPixels(); i++) {
-        SmartLed::strip->setPixelColor(i, SmartLed::strip->Color(0, 0, 255));  // Modrá barva
+        SmartLed::strip->setPixelColor(i, SmartLed::strip->Color(SmartLed::strip_color_r, SmartLed::strip_color_g, SmartLed::strip_color_b));  
     }
-    SmartLed::strip->show();  // Aplikace změn na pásku
-    delay(1000);    // Čekání 1 sekundu
-    
-    // Změna na červenou
-    for (int i = 0; i < SmartLed::strip->numPixels(); i++) {
-        SmartLed::strip->setPixelColor(i, SmartLed::strip->Color(255, 0, 0));  // Červená barva
-    }
-    SmartLed::strip->show();
-    delay(1000);    // Čekání 1 sekundu
-    
-    // Změna na zelenou
-    for (int i = 0; i < SmartLed::strip->numPixels(); i++) {
-        SmartLed::strip->setPixelColor(i, SmartLed::strip->Color(0, 255, 0));  // Zelená barva
-    }
-    SmartLed::strip->show();
-    delay(1000);    // Čekání 1 sekundu
+    SmartLed::strip->show();  
+}
+
+void SmartLed::change_color(int r, int g, int b) {
+    SmartLed::strip_color_r = r;
+    SmartLed::strip_color_g = g;
+    SmartLed::strip_color_b = b;
+
+    SmartLed::update_led();
 }

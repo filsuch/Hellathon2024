@@ -16,21 +16,48 @@
 // Inicializace displeje
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_DC, OLED_RESET, OLED_CS);
 
-void setup() {
-    // Nastavení displeje
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3D); // 0x3D je adresa pro 128x64 displej
-    display.clearDisplay();  // Vyčistění displeje
+Adafruit_AHT10 aht;
 
-    // Nastavení textových vlastností
+void setup() {
+    Serial.begin(115200);
+    
+    // Inicializace displeje
+    display.begin(SSD1306_I2C_ADDRESS, 0x3C); // 0x3C je běžná adresa pro OLED displej
+    display.clearDisplay();  // Vyčistění displeje
+    
+    // Inicializace senzoru
+    if (!aht.begin()) {
+        Serial.println("Nepodařilo se inicializovat AHT10!");
+        while (1);
+    }
+
     display.setTextSize(1);  // Velikost textu
     display.setTextColor(WHITE);  // Barva textu
-    display.setCursor(0, 0);  // Nastavení kurzoru na začátek displeje
-
-    // Zobrazení textu na displeji
-    display.println("Ahoj, světe!");  // Text, který se má zobrazit
-    display.display();  // Odeslání obsahu do displeje
 }
 
 void loop() {
-    // Hlavní smyčka (můžete přidat další kód pro aktualizaci displeje)
+    // Čtení dat ze senzoru
+    if (aht.read()) {
+        float temperature = aht.getTemperature(); // Získání teploty
+        float humidity = aht.getHumidity();       // Získání vlhkosti
+        
+        // Vyčištění displeje
+        display.clearDisplay();
+        
+        // Zobrazení hodnot
+        display.setCursor(0, 0);
+        display.print("Teplota: ");
+        display.print(temperature);
+        display.println(" C");
+
+        display.print("Vlhkost: ");
+        display.print(humidity);
+        display.println(" %");
+
+        display.display();  // Odeslání obsahu na displej
+    } else {
+        Serial.println("Chyba při čtení z AHT10");
+    }
+
+    delay(2000);  // Počkat 2 sekundy před dalším měřením
 }

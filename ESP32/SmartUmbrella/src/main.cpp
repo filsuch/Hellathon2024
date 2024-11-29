@@ -1,7 +1,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
-#include <Adafruit_AHT10.h>
+#include <DHT.h>
+ #include <Adafruit_Sensor.h>
 
 #define SCREEN_WIDTH 128  // Šířka displeje v pixelech
 #define SCREEN_HEIGHT 64  // Výška displeje v pixelech
@@ -16,48 +17,62 @@
 // Inicializace displeje
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_SCK, OLED_DC, OLED_RESET, OLED_CS);
 
-Adafruit_AHT10 aht;
+
+
+// Nastavení DHT11
+#define DHTPIN 14         // Pin, na který je připojen DHT11
+#define DHTTYPE DHT11     // Typ senzoru
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
-  // Nastavení sériové komunikace
-  Serial.begin(115200);
-  
-  // Inicializace displeje
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.clearDisplay();
-  display.setTextSize(1);      
-  display.setTextColor(SSD1306_WHITE);  
-  display.setCursor(0,0);
-  
-  // Inicializace senzoru AHT10
-  if (!aht10.begin()) {
-    Serial.println("Nemohu najít AHT10 sensor!");
-    while (1);
-  }
+    // Inicializace sériové komunikace
+    Serial.begin(115200);
+    
+    // Inicializace OLED displeje
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_CS);  // Upravte inicializaci pro SPI
+    display.clearDisplay();
+    
+    // Inicializace DHT11
+    dht.begin();
+    
+    // Zobrazení úvodního textu
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.print("DHT11 Sensor");
+    display.display();
+    delay(2000);
 }
 
 void loop() {
-  // Získání dat ze senzoru
-  float temperature = aht10.readTemperature();
-  float humidity = aht10.readHumidity();
+    // Načtení hodnot teploty a vlhkosti
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
 
-  // Zobrazení dat na sériovém monitoru
-  Serial.print("Teplota: ");
-  Serial.print(temperature);
-  Serial.print(" °C, Vlhkost: ");
-  Serial.print(humidity);
-  Serial.println(" %");
+    // Zkontrolujte, zda nedošlo k chybě při načítání dat
+    if (isnan(humidity) || isnan(temperature)) {
+        Serial.println("Failed to read from DHT sensor!");
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Error reading DHT");
+        display.display();
+        return;
+    }
 
-  // Zobrazení dat na OLED displeji
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print("Teplota: ");
-  display.print(temperature);
-  display.println(" °C");
-  display.print("Vlhkost: ");
-  display.print(humidity);
-  display.println(" %");
-  display.display();
-  
-  delay(2000); // Aktualizace každé 2 sekundy
+    // Zobrazení hodnot na OLED displeji
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Humidity: ");
+    display.print(humidity);
+    display.print(" %");
+    
+    display.setCursor(0, 10);
+    display.print("Temp: ");
+    display.print(temperature);
+    display.print(" *C");
+    
+    display.display();
+
+    // Čekání před dalším čtením
+    delay(2000);
 }

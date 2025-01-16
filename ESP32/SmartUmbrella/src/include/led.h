@@ -3,28 +3,28 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN            13    // Pin, na kterém je připojen Data pin LED pásku
-#define NUMPIXELS      11   // Počet LED na pásku
+#define PIN_2            12    // Pin, na kterém je připojen Data pin LED pásku
+#define NUMPIXELS      10   // Počet LED na pásku
 
 
 class SmartLed
 {
 private:
 
-    static inline Adafruit_NeoPixel* strip = NULL;
+    Adafruit_NeoPixel* strip = NULL;
 
-    static inline int strip_color_r = 0;
-    static inline int strip_color_g = 0;
-    static inline int strip_color_b = 0;
-
-    static void update_led();
+    int strip_color_r = 0;
+    int strip_color_g = 0;
+    int strip_color_b = 0;
+    void update_led();
     
 public:
-    static void begin();
-    static void loop();
-    static void change_color(int r, int g, int b);
+    void begin(int pin);
+    void loop();
+    void change_color(int r, int g, int b);
 
-    static void on();
-    static void off();
+    void on();
+    void off();
     
 
 };

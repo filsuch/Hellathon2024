@@ -1,15 +1,19 @@
 #include "./include/led.h"
 
 
-void SmartLed::begin() {
-    SmartLed::strip =  new Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+void SmartLed::begin(int pin) {
+    SmartLed::strip =  new Adafruit_NeoPixel(NUMPIXELS, pin, NEO_GRB + NEO_KHZ800);
 
     // Inicializace NeoPixel pásku
     SmartLed::strip->begin();
     SmartLed::strip->show();  // Nastaví všechny LED na "off"
 }
 
-void SmartLed::loop() { }
+void SmartLed::loop() { 
+
+
+
+}
 
 void SmartLed::update_led() {
     // Nastavení barev pro všechny LED na pásku (modrá)
